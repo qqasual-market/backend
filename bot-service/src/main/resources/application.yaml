@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url:
+      jdbc:postgresql://localhost:5432/order_db
+    hikari:
+      username: postgres
+      password: garage123
+      driver-class-name: org.postgresql.Driver
+      auto-commit: false
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        generate_statistics:
+          true
+
+telegram:
+  bot-token: 7429114213:AAE2-zlkX3fzcYUMyqxyFU83cJKMTLLXXyc
