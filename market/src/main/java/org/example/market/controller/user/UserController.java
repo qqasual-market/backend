@@ -22,43 +22,42 @@ import java.io.IOException;
 @Validated
 @RequestMapping("/user")
 public class UserController {
-private final ImageService imageService;
-private final ProfileService profileService;
+    private final ImageService imageService;
+    private final ProfileService profileService;
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadAvatarUser(
             @NotBlank @RequestHeader(name = "username") String username,
             MultipartFile file) throws IOException {
-            if (file.isEmpty()) {
-                return ResponseEntity.ok()
-                        .body("File is empty");
-            }
-            imageService.addAvatarUser(username,file);
+        if (file.isEmpty()) {
             return ResponseEntity.ok()
-                    .body("Upload successful");
+                    .body("File is empty");
+        }
+        imageService.addAvatarUser(username, file);
+        return ResponseEntity.ok()
+                .body("Upload successful");
     }
 
     @GetMapping("/profile/{profileId}")
     public ResponseEntity<ResponseUserInfo> getProfile(
             @Positive @PathVariable Long profileId,
             @NotBlank @RequestHeader(name = "username") String username) {
-      ResponseUserInfo userInfo = profileService.getUserInfo(profileId,username);
-      return ResponseEntity.ok().body(userInfo);
+        ResponseUserInfo userInfo = profileService.getUserInfo(profileId, username);
+        return ResponseEntity.ok().body(userInfo);
     }
 
     @GetMapping("/settings")
     public ResponseEntity<ResponseSettingsUser> setUserSettings(
-            @NotBlank @RequestHeader(name = "AccessToken")String token,
+            @NotBlank @RequestHeader(name = "AccessToken") String token,
             @Valid @RequestBody RequestSettingsUser settingsUser) {
         if (settingsUser == null || settingsUser.getEmail() == null
-        && settingsUser.getUsername() == null) {
-            throw new  NotFoundData("The data is empty");
+                && settingsUser.getUsername() == null) {
+            throw new NotFoundData("The data is empty");
         }
-      ResponseSettingsUser settings =  profileService
-              .getAndSetSettingsUser(token,settingsUser);
-    return ResponseEntity.ok().body(settings);
+        ResponseSettingsUser settings = profileService
+                .getAndSetSettingsUser(token, settingsUser);
+        return ResponseEntity.ok().body(settings);
     }
-
 
 
 }
