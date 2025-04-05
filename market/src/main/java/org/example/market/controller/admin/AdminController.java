@@ -18,9 +18,9 @@ private final AdminService adminService;
 @PostMapping("/update/product/{id}")
 public ResponseEntity<Void> updateProduct(
         @PathVariable("id") Long id,
-        @NotBlank @RequestHeader(name = "AccessToken") String token,
+        @NotBlank @RequestHeader(name = "username") String username,
         @Valid ProductRequest productRequest) {
-    adminService.EditProduct(token,id,productRequest);
+    adminService.editProduct(username,id,productRequest);
     return ResponseEntity.ok().build();
 }
 

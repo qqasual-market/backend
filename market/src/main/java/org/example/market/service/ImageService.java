@@ -6,6 +6,8 @@ import org.apache.logging.log4j.Logger;
 import org.example.market.entity.Image;
 import org.example.market.entity.Product;
 import org.example.market.entity.User;
+import org.example.market.exception.NotFoundProductException;
+import org.example.market.exception.NotFoundUserException;
 import org.example.market.repository.ImageRepository;
 import org.example.market.repository.ProductsRepository;
 import org.example.market.repository.UserRepository;
@@ -20,44 +22,34 @@ import java.util.Optional;
 public class ImageService {
     private final ImageRepository imageRepository;
     private final ProductsRepository productsRepository;
-    private final JwtService jwtService;
     private final UserRepository userRepository;
     public static final Logger logger = LogManager.getLogger(MarketService.class);
 
-    public void addImageInProduct(MultipartFile file,String token,Long id) {
-        try {
-           String username = jwtService.getAccessClaims(token).getSubject();
-           if (username != null) {
+    public void addImageInProduct(MultipartFile file,final String username,final Long id) throws IOException {
+            Optional<User> user = userRepository.findByUsername(username);
             Optional<Product> product = productsRepository.findProductByUsernameAndProductId(username,id);
-             if (product != null) {
-                 Image image = Image.builder()
+
+            if (user.isEmpty()) throw new NotFoundUserException("User not found");
+            if (product.isEmpty()) throw new NotFoundProductException("Product not found");
+            Image image = Image.builder()
                          .imageName(file.getOriginalFilename())
                          .imageData(file.getBytes())
                          .build();
                  image.setProduct(product.get());
                  imageRepository.save(image);
-             }
-           }
-        } catch (IOException e) {
-            logger.error(e);
         }
-    }
 
-    public void addAvatarUser(String token,MultipartFile file) throws IOException {
-      try {
-       String username = jwtService.getAccessClaims(token).getSubject();
-       if (username != null) {
-            Optional<User> user = userRepository.findByUsername(username);
-            Image image = Image.builder()
-                .imageName(file.getOriginalFilename())
-                .imageData(file.getBytes())
-                .build();
-       image.setUser(user.get());
-       imageRepository.save(image);
-       }
-    } catch (Exception e) {
-      logger.error(e);
-      }
+
+public void addAvatarUser(final String username,MultipartFile file) throws IOException {
+    Optional<User> user = userRepository.findByUsername(username);
+       if (user.isEmpty()) throw new NotFoundUserException("User not found");
+       Image image = new Image();
+            image.setImageData(file.getBytes());
+            image.setImageName(file.getOriginalFilename());
+            image.setUser(user.get());
+        user.get().setImage(image);
+    userRepository.save(user.get());
+
     }
 
 
