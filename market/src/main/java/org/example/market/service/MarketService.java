@@ -24,6 +24,7 @@ import org.example.market.repository.SoldProductRepository;
 import org.example.market.repository.UserRepository;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,7 @@ import java.util.List;
 public class MarketService {
     public static final Logger logger = LogManager.getLogger(MarketService.class);
     private final ProductsRepository productsRepository;
+    private final JwtService jwtService;
     private final UserRepository userRepository;
     private final SoldProductRepository soldProductRepository;
     private final ImageRepository imageRepository;
@@ -124,27 +126,32 @@ public class MarketService {
     }
 
 
-    public void updateProduct(final Long productId, final String username, ProductUpdateRequest request) throws IllegalArgumentException {
-        Optional<Product> product = productsRepository.findProductByUsernameAndProductId(username, productId);
-        if (userRepository.findByUsername(username).isPresent()
-                && product.isPresent()) {
-
-            if (request.getProductName() != null) {
-                product.get().setProductName(request.getProductName());
+    public void updateProduct(Long productId, String token, ProductUpdateRequest request) throws IllegalArgumentException {
+        try {
+            final String username = jwtService.getAccessClaims(token).getSubject();
+            if (userRepository.findByUsername(username) != null) {
+               Optional<Product> product = productsRepository.findProductByUsernameAndProductId(username, productId);
+                if (product != null) {
+                    logger.info(product);
+                    if (request.getProductName() != null) {
+                        product.get().setProductName(request.getProductName());
+                    }
+                    if (request.getQuantity() != null) {
+                        product.get().setQuantity(request.getQuantity());
+                    }
+                    if (request.getPrice() != null) {
+                        product.get().setProductPrice(request.getPrice());
+                    }
+                    if (request.getCategoryProduct() != null) {
+                        product.get().setCategoryProduct(ProductCategory.valueOf(request.getCategoryProduct()));
+                    }
+                    productsRepository.save(product.get());
+                }
             }
-            if (request.getQuantity() != null) {
-                product.get().setQuantity(request.getQuantity());
-            }
-            if (request.getPrice() != null) {
-                product.get().setProductPrice(request.getPrice());
-            }
-            if (request.getCategoryProduct() != null) {
-                product.get().setCategoryProduct(ProductCategory.valueOf(request.getCategoryProduct()));
-            }
-            productsRepository.save(product.get());
+        } catch (Exception e) {
+            logger.error(e);
         }
     }
-
 
     public static String generateUnId() {
         Random random = new Random();

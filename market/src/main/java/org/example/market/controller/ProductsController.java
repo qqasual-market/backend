@@ -14,7 +14,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,18 +29,18 @@ public class ProductsController {
 
     @PostMapping("/create/")
     public ResponseEntity<Void> createProduct (
-      @NotBlank @RequestHeader(name = "username") String username,
+      @NotBlank @RequestHeader(name = "AccessToken") String accessToken,
       @Valid @RequestBody ProductRequest request) {
-         marketService.createProduct(username,request);
+         marketService.createProduct(accessToken,request);
          return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/delete/")
     public ResponseEntity<Void> deleteProduct (
-    @NotBlank @RequestHeader(name = "username") String username,
+    @NotBlank @RequestHeader(name = "AccessToken") String token,
     @Positive @RequestHeader("Id") Long id,
     @NotBlank @RequestParam("address") String address) {
-        marketService.deleteProductByUser(id,username);
+        marketService.deleteProductByUser(id,token);
         return ResponseEntity.ok().build();
     }
 
@@ -54,21 +53,21 @@ public class ProductsController {
 
   @PostMapping("/buy/")
   public ResponseEntity<String> buyProduct(
-         @NotBlank @RequestHeader(name = "username") String username,
+         @NotBlank @RequestHeader(name = "AccessToken") String token,
          @NotNull @Positive @RequestParam Long id,
          @NotNull @Positive @RequestParam Integer quantity,
          @NotBlank @RequestParam("address") String address  ) {
-  marketService.buyProduct(username,id,quantity,address);
+  marketService.buyProduct(token,id,quantity,address);
   return ResponseEntity.ok().body("Success Buy!");
   }
 
 
 @PutMapping("/update/")
 public ResponseEntity<String> updateProduct (
-        @NotBlank @RequestHeader("username") String username,
+        @NotBlank @RequestHeader("AccessToken") String token,
         @Valid @RequestBody ProductUpdateRequest request,
         @Positive @RequestParam Long id) {
-    marketService.updateProduct(id,username,request);
+    marketService.updateProduct(id,token,request);
     return ResponseEntity.ok("Товар успешно обновлён!");
     }
 
@@ -76,11 +75,11 @@ public ResponseEntity<String> updateProduct (
 public ResponseEntity<String> uploadImageInProduct(
       MultipartFile file,
       @Positive Long id,
-      @NotBlank @RequestHeader(name = "username") String username) throws IOException {
+      @NotBlank @RequestHeader(name = "AccessToken") String token) {
     if (file.isEmpty()) {
         return ResponseEntity.badRequest().body("Файл не найден");
     }
-    imageService.addImageInProduct(file,username,id);
+    imageService.addImageInProduct(file,token,id);
     return ResponseEntity.ok().body("Success Upload!");
 }
 

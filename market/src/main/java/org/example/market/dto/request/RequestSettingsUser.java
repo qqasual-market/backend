@@ -8,7 +8,6 @@ import lombok.Data;
 public class RequestSettingsUser {
     @Min(4)
     private String username;
-
     @Email
     private String email;
 }

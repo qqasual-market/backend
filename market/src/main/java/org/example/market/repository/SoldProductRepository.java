@@ -11,9 +11,6 @@ import java.util.List;
 
 @Repository
 public interface SoldProductRepository  extends JpaRepository<SoldProduct, Long> {
-    @NativeQuery("SELECT quantity FROM sold_product WHERE id_seller = :id")
-    List<ResponseSoldProduct> findAllSalesProductByIdUser(@Param("id") Long id);
-
-    @NativeQuery("SELECT quantity FROM sold_product WHERE id_buyer = :id")
-    List<ResponseSoldProduct> findAllBuyProductByIdUser(@Param("id") Long id);
+    @NativeQuery("SELECT quantity FROM sold_product WHERE id_seller = id")
+    List<ResponseSoldProduct> findSoldByIdUser(@Param("id") Long id);
 }
