@@ -12,16 +12,16 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 public class AdminController {
-private final AdminService adminService;
+    private final AdminService adminService;
 
 
-@PostMapping("/update/product/{id}")
-public ResponseEntity<Void> updateProduct(
-        @PathVariable("id") Long id,
-        @NotBlank @RequestHeader(name = "AccessToken") String token,
-        @Valid ProductRequest productRequest) {
-    adminService.EditProduct(token,id,productRequest);
-    return ResponseEntity.ok().build();
-}
+    @PostMapping("/update/product/{id}")
+    public ResponseEntity<Void> updateProduct(
+            @PathVariable("id") Long id,
+            @NotBlank @RequestHeader(name = "AccessToken") String token,
+            @Valid ProductRequest productRequest) {
+        adminService.EditProduct(token, id, productRequest);
+        return ResponseEntity.ok().build();
+    }
 
 }
