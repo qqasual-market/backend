@@ -1,8 +1,6 @@
-package org.example.securityservice;
+package org.example.market;
 
-import org.example.market.MarketApplication;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 public class TestMarketApplication {
 

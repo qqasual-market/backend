@@ -1,26 +1,17 @@
-package org.example.securityservice.service;
+package org.example.market.service;
 
 import org.example.market.dto.ProductDTO;
 import org.example.market.entity.Product;
-import org.example.market.entity.User;
-import org.example.market.entity.enums.ProductCategory;
-import org.example.market.entity.enums.Role;
-import org.example.market.exception.NotFoundUserException;
 import org.example.market.repository.ProductsRepository;
 import org.example.market.repository.SoldProductRepository;
-import org.example.market.repository.UserRepository;
-import org.example.market.service.MarketService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.internal.creation.bytebuddy.MockAccess;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;

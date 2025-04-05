@@ -1,4 +1,5 @@
 package org.example.market.service;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -82,8 +83,8 @@ public class MarketService {
     }
 
     @Transactional
-    public void deleteProductByUser( final Long id, final String username) throws NotFoundProductException {
-       Optional<User> user = userRepository.findByUsername(username);
+    public void deleteProductByUser(final Long id, final String username) throws NotFoundProductException {
+        Optional<User> user = userRepository.findByUsername(username);
         if (user.isEmpty()) {
             throw new NotFoundUserException("User not found");
         }
@@ -109,12 +110,12 @@ public class MarketService {
 
 
     public List<ProductDTO> getAllProducts() {
-            List<ProductDTO> products = productsRepository.findAllProducts();
-            if (products == null || products.isEmpty()) {
-                throw new NotFoundProductException("Список продуктов пуст");
-            }
-            return products;
+        List<ProductDTO> products = productsRepository.findAllProducts();
+        if (products == null || products.isEmpty()) {
+            throw new NotFoundProductException("Список продуктов пуст");
         }
+        return products;
+    }
 
 
     public void buyProduct(final String username, final Long id, final Integer quantity, final String address) {
@@ -155,73 +156,72 @@ public class MarketService {
 
     public SoldProduct buildSoldProduct(
             Optional<User> productOwner,
-            Optional<User> user,Optional<Product> product,
-            Integer resultQuantity)
-    {
+            Optional<User> user, Optional<Product> product,
+            Integer resultQuantity) {
         SoldProduct soldProduct = SoldProduct.builder()
-            .nameSeller(productOwner.get().getUsername())
-            .nameBuyer(user.get().getUsername())
-            .product(product.get())
-            .id_buyer(user.get().getId())
-            .id_seller(productOwner.get().getId())
-            .quantity(resultQuantity)
-            .uniqueId(generateUnId().toString())
-            .build();
+                .nameSeller(productOwner.get().getUsername())
+                .nameBuyer(user.get().getUsername())
+                .product(product.get())
+                .id_buyer(user.get().getId())
+                .id_seller(productOwner.get().getId())
+                .quantity(resultQuantity)
+                .uniqueId(generateUnId().toString())
+                .build();
         return soldProduct;
     }
 
-@Transactional
-public void buyProductsAbstract(Optional<User> user,Optional<Product> product,Integer quantity,String address) {
-    Optional<User> productOwner = userRepository.findByUsername(product.get().getUser().getUsername());
-    BigDecimal userBalance = user.get().getBalance();
-    Integer resultQuantity = product.get().getQuantity() - quantity;
-    BigDecimal resultQuantityAndPrice =  userBalance.multiply(BigDecimal.valueOf(quantity));
-    int resultQuantityAndPriceInt = resultQuantityAndPrice.compareTo(user.get().getBalance());
-    BigDecimal resultBalance = userBalance.subtract(resultQuantityAndPrice);
+    @Transactional
+    public void buyProductsAbstract(Optional<User> user, Optional<Product> product, Integer quantity, String address) {
+        Optional<User> productOwner = userRepository.findByUsername(product.get().getUser().getUsername());
+        BigDecimal userBalance = user.get().getBalance();
+        Integer resultQuantity = product.get().getQuantity() - quantity;
+        BigDecimal resultQuantityAndPrice = userBalance.multiply(BigDecimal.valueOf(quantity));
+        int resultQuantityAndPriceInt = resultQuantityAndPrice.compareTo(user.get().getBalance());
+        BigDecimal resultBalance = userBalance.subtract(resultQuantityAndPrice);
 
-    if (product.isPresent() && user.isPresent()) {
+        if (product.isPresent() && user.isPresent()) {
 
-        if (quantity <= product.get().getQuantity()
-            && product.get().getQuantity() > 0) {
+            if (quantity <= product.get().getQuantity()
+                    && product.get().getQuantity() > 0) {
 
-              product.get().setQuantity(resultQuantity);
+                product.get().setQuantity(resultQuantity);
 
-            if (productOwner != user
-               && productOwner.get().getBalance() != null
-               && resultQuantityAndPriceInt == -1
-               || resultQuantityAndPriceInt == 0 ) {
+                if (productOwner != user
+                        && productOwner.get().getBalance() != null
+                        && resultQuantityAndPriceInt == -1
+                        || resultQuantityAndPriceInt == 0) {
 
-                 productOwner.get().setBalance(
-                    productOwner.get().getBalance()
-                   .add(resultQuantityAndPrice)
-                 );
+                    productOwner.get().setBalance(
+                            productOwner.get().getBalance()
+                                    .add(resultQuantityAndPrice)
+                    );
 
-                 user.get().setBalance(resultBalance);
+                    user.get().setBalance(resultBalance);
 
                     if (user.get().getEmail() != null) {
-                       SendEmailAboutPurchase(
-                            user.get().getUsername(),
-                            user.get().getEmail()
-                       );
+                        SendEmailAboutPurchase(
+                                user.get().getUsername(),
+                                user.get().getEmail()
+                        );
                     }
 
 
-                soldProductRepository.save(buildSoldProduct(productOwner, user, product, resultQuantity));
-                userRepository.save(user.get());
-                userRepository.save(productOwner.get());
-                SendOrder(address,product.get().getProductPrice(),user.get().getUsername(),product.get().getProductName());
+                    soldProductRepository.save(buildSoldProduct(productOwner, user, product, resultQuantity));
+                    userRepository.save(user.get());
+                    userRepository.save(productOwner.get());
+                    SendOrder(address, product.get().getProductPrice(), user.get().getUsername(), product.get().getProductName());
 
                 }
             }
         }
     }
 
-    public void SendEmailAboutPurchase(@NotBlank String username,@Email @NotBlank String  email) {
-        EmailDTO emailDTO = new EmailDTO(username,email);
+    public void SendEmailAboutPurchase(@NotBlank String username, @Email @NotBlank String email) {
+        EmailDTO emailDTO = new EmailDTO(username, email);
         kafkaTemplate.send("topic1", emailDTO);
     }
 
-    public void SendOrder(String address,BigDecimal price,String username,String productName) {
+    public void SendOrder(String address, BigDecimal price, String username, String productName) {
         orderKafkaTemplate.send("topic2", KafkaOrderDTO.builder()
                 .address(address)
                 .price(price)
@@ -229,8 +229,6 @@ public void buyProductsAbstract(Optional<User> user,Optional<Product> product,In
                 .product(productName)
                 .build());
     }
-
-
 
 
 }

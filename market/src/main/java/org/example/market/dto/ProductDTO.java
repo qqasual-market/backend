@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.market.entity.User;
@@ -13,6 +14,7 @@ import org.springframework.data.annotation.PersistenceCreator;
 
 @Data
 @AllArgsConstructor
+@Builder
 public class ProductDTO {
 
     @Column(name = "product_name")

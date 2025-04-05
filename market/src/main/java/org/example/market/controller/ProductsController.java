@@ -22,7 +22,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @Validated
-@RequestMapping("products")
+@RequestMapping("/products")
 public class ProductsController {
 
     private final MarketService marketService;
@@ -39,7 +39,7 @@ public class ProductsController {
     @DeleteMapping("/delete/")
     public ResponseEntity<Void> deleteProduct (
     @NotBlank @RequestHeader(name = "username") String username,
-    @Positive @RequestHeader("Id") Long id,
+    @NotNull @Positive @RequestHeader("Id") Long id,
     @NotBlank @RequestParam("address") String address) {
         marketService.deleteProductByUser(id, username);
         return ResponseEntity.ok().build();
@@ -67,7 +67,7 @@ public class ProductsController {
 public ResponseEntity<String> updateProduct (
         @NotBlank @RequestHeader("username") String username,
         @Valid @RequestBody ProductUpdateRequest request,
-        @Positive @RequestParam Long id) {
+        @NotNull @Positive @RequestParam Long id) {
     marketService.updateProduct(id,username, request);
     return ResponseEntity.ok("Товар успешно обновлён!");
     }
@@ -75,7 +75,7 @@ public ResponseEntity<String> updateProduct (
 @PostMapping("/upload")
 public ResponseEntity<String> uploadImageInProduct(
       MultipartFile file,
-      @Positive Long id,
+      @NotNull @Positive Long id,
       @NotBlank @RequestHeader(name = "username") String username) {
     try {
         if (file.isEmpty()) {
