@@ -123,7 +123,6 @@ public class MarketService {
         buyProductsAbstract(user, product, quantity, address);
     }
 
-
     public void updateProduct(final Long productId, final String username, ProductUpdateRequest request) throws IllegalArgumentException {
         Optional<Product> product = productsRepository.findProductByUsernameAndProductId(username, productId);
         if (userRepository.findByUsername(username).isPresent()
@@ -144,7 +143,6 @@ public class MarketService {
             productsRepository.save(product.get());
         }
     }
-
 
     public static String generateUnId() {
         Random random = new Random();
