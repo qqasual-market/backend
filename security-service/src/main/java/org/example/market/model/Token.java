@@ -1,4 +1,4 @@
-package org.example.securityservice.model;
+package org.example.market.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

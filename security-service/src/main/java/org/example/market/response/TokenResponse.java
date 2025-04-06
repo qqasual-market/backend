@@ -1,4 +1,4 @@
-package org.example.securityservice.response;
+package org.example.market.response;
 
 import lombok.*;
 import org.springframework.lang.Nullable;
