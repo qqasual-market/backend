@@ -1,9 +1,9 @@
-package org.example.securityservice.model;
+package org.example.market.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import lombok.*;
-import org.example.securityservice.model.enums.RoleEnum;
+import org.example.market.model.enums.RoleEnum;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,6 +18,7 @@ import java.util.*;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
+@Builder
 public class User implements UserDetails {
 @Id
 @GeneratedValue(strategy = GenerationType.IDENTITY)

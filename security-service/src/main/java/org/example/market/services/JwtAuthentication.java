@@ -1,16 +1,14 @@
-package org.example.securityservice.services;
+package org.example.market.services;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.example.securityservice.model.enums.RoleEnum;
+import org.example.market.model.enums.RoleEnum;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.security.auth.Subject;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter

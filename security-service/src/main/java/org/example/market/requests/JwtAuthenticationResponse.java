@@ -1,4 +1,4 @@
-package org.example.securityservice.requests;
+package org.example.market.requests;
 
 
 import lombok.AllArgsConstructor;
