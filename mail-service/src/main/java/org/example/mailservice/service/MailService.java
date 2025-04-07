@@ -7,71 +7,89 @@ import org.apache.logging.log4j.Logger;
 import org.example.mailservice.dto.Mail;
 import org.example.mailservice.repository.MailRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.mail.MailProperties;
 import org.springframework.stereotype.Service;
 
 import javax.mail.*;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.Properties;
+
 @RequiredArgsConstructor
 @Service
 public class MailService {
-    public final MailRepository mailRepository;
-    Logger logger = LogManager.getLogger(MailService.class);
-    @Value("${email.password}") String password;
-    @Value("${email.username}") String username;
+    private static final Logger logger = LogManager.getLogger(MailService.class);
 
-    public Properties getMailProperties() {
+    private final MailRepository mailRepository;
+    private final Session session;
+
+    @Value("${email.password}")
+    private String password;
+
+    @Value("${email.username}")
+    private String username;
+
+    public MailService(MailRepository mailRepository) {
+        this.mailRepository = mailRepository;
+        this.session = createMailSession();
+    }
+
+    private Session createMailSession() {
+        return Session.getInstance(
+                getMailProperties(),
+                new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(username, password);
+                    }
+                }
+        )
+    }
+
+    private Properties getMailProperties() {
         Properties properties = new Properties();
         properties.put("mail.smtp.host", "smtp.mail.ru");
         properties.put("mail.smtp.auth", "true");
         properties.put("mail.smtp.port", "465");
         properties.put("mail.smtp.ssl.enable", "true");
-        properties.put("mail.smtp.starttls.enable", "true");
         return properties;
     }
 
-    final Session session = Session.getDefaultInstance(getMailProperties(), new Authenticator() {
-        @Override
-        protected PasswordAuthentication getPasswordAuthentication() {
-            return new PasswordAuthentication(username, password);
-        }
-    });
-
-
-    public boolean checkMail(@Email String email) {
-       Mail mail = mailRepository.findByEmail(email);
-       if (mail == null) {
-           return true;
-       }
-        return false;
+    public boolean isEmailUnique(@Email final String email) {
+        return !mailRepository.existsByEmail(email);
     }
 
+    public void sendMessageInMail(@Email final String email, final Long id) throws MessagingException {
+        if (email == null) return;
+        sendEmailSafely(email, id);
+    }
 
-
-    public void SendMessageInMail(@Email String email,Long id) throws MessagingException {
+    private void sendEmailSafely(final String email, final Long id) throws MessagingException {
         try {
-            if (email != null && email != null) {
-                Message message = new MimeMessage(session);
-                message.setFrom(new InternetAddress(username));
-                message.setRecipient(Message.RecipientType.TO, new InternetAddress(email));
-                message.setSubject(email);
-                message.setText("Заказ " + id + " был успешно взят");
-                Transport.send(message);
-                logger.info("Сообщение было успешно отправлено");
-                if (checkMail(email) == true) {
-                    Mail mail = new Mail();
-                    mail.setEmail(email);
-                    mailRepository.save(mail);
-                }
-                else logger.info("Почта уже существует в базе");
-                }
-            }
-         catch (Exception e) {
-            logger.error(e);
+            sendEmail(email, id);
+            handleEmailRegistration(email);
+        } catch (MessagingException e) {
+            logger.error("Ошибка отправки на {}", email, e);
+            throw e;
         }
     }
 
+    private void sendEmail(final String email, final Long id) throws MessagingException {
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(username));
+        message.setRecipient(Message.RecipientType.TO, new InternetAddress(email));
+        message.setSubject("Уведомление о заказе");
+        message.setText("Заказ " + id + " был успешно взят");
+
+        Transport.send(message);
+        logger.info("Сообщение отправлено на {}", email);
+    }
+
+    private void handleEmailRegistration(String email) {
+        if (mailRepository.existsByEmail(email)) {
+            logger.info("Почта {} уже в базе", email);
+        } else {
+            mailRepository.save(new Mail(email));
+            logger.info("Почта {} сохранена в базу", email);
+        }
+    }
 }
