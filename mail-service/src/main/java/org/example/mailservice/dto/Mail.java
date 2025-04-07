@@ -12,7 +12,6 @@ public class Mail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String email;
-    
 
+    private String email;
 }
