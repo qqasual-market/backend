@@ -32,15 +32,14 @@ public class ProfileService {
     private final SoldProductRepository soldProductRepository;
     public static final Logger logger = LogManager.getLogger(MarketService.class);
 
-
-    public ResponseUserInfo getUserInfo(final Long userId,final String username) {
+    public ResponseUserInfo getUserInfo(final Long userId, final String username) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) throw new NotFoundUserException("User not found");
 
         final String roles = user.get().getRoles().toString();
-            Optional<ResponseImageData> image = imageRepository.findImageByUserId(userId);
-            List<ResponseSoldProduct> stateSeller = soldProductRepository.findAllSalesProductByIdUser(userId);
-            List<ResponseSoldProduct> stateBuyer = soldProductRepository.findAllBuyProductByIdUser(userId);
+        Optional<ResponseImageData> image = imageRepository.findImageByUserId(userId);
+        List<ResponseSoldProduct> stateSeller = soldProductRepository.findAllSalesProductByIdUser(userId);
+        List<ResponseSoldProduct> stateBuyer = soldProductRepository.findAllBuyProductByIdUser(userId);
 
         final int sumSales = summingSalesAndPurchases(stateSeller);
         final int sumPurchases = summingSalesAndPurchases(stateBuyer);
@@ -63,24 +62,22 @@ public class ProfileService {
     public ResponseSettingsUser getAndSetSettingsUser(final String username, RequestSettingsUser request) {
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isEmpty()) throw new NotFoundUserException("User not found");
-            if (Objects.nonNull(request.getUsername() != null)) {
-                user.get().setUsername(request.getUsername());
-            }
-            if (Objects.nonNull(request.getEmail())) {
-                user.get().setEmail(request.getEmail());
-            }
-            userRepository.save(user.get());
-            return ResponseSettingsUser.builder()
-                    .username(user.get().getUsername())
-                    .email(user.get().getEmail())
-                    .role(user.get().getRoles().toString()
-                          .substring(5))
-                    .build();
-
+        if (Objects.nonNull(request.getUsername() != null)) {
+            user.get().setUsername(request.getUsername());
+        }
+        if (Objects.nonNull(request.getEmail())) {
+            user.get().setEmail(request.getEmail());
+        }
+        userRepository.save(user.get());
+        return ResponseSettingsUser.builder()
+                .username(user.get().getUsername())
+                .email(user.get().getEmail())
+                .role(user.get().getRoles().toString()
+                        .substring(5))
+                .build();
     }
 
-
-        }
+}
 
 
 

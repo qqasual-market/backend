@@ -22,7 +22,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @Validated
-@RequestMapping("products")
+@RequestMapping("/products")
 public class ProductsController {
 
     private final MarketService marketService;
@@ -32,16 +32,16 @@ public class ProductsController {
     public ResponseEntity<Void> createProduct (
       @NotBlank @RequestHeader(name = "username") String username,
       @Valid @RequestBody ProductRequest request) {
-         marketService.createProduct(username,request);
+         marketService.createProduct(username, request);
          return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/delete/")
     public ResponseEntity<Void> deleteProduct (
     @NotBlank @RequestHeader(name = "username") String username,
-    @Positive @RequestHeader("Id") Long id,
+    @NotNull @Positive @RequestHeader("Id") Long id,
     @NotBlank @RequestParam("address") String address) {
-        marketService.deleteProductByUser(id,username);
+        marketService.deleteProductByUser(id, username);
         return ResponseEntity.ok().build();
     }
 
@@ -58,7 +58,7 @@ public class ProductsController {
          @NotNull @Positive @RequestParam Long id,
          @NotNull @Positive @RequestParam Integer quantity,
          @NotBlank @RequestParam("address") String address  ) {
-  marketService.buyProduct(username,id,quantity,address);
+  marketService.buyProduct(username, id, quantity, address);
   return ResponseEntity.ok().body("Success Buy!");
   }
 
@@ -67,23 +67,26 @@ public class ProductsController {
 public ResponseEntity<String> updateProduct (
         @NotBlank @RequestHeader("username") String username,
         @Valid @RequestBody ProductUpdateRequest request,
-        @Positive @RequestParam Long id) {
-    marketService.updateProduct(id,username,request);
+        @NotNull @Positive @RequestParam Long id) {
+    marketService.updateProduct(id,username, request);
     return ResponseEntity.ok("Товар успешно обновлён!");
     }
 
 @PostMapping("/upload")
 public ResponseEntity<String> uploadImageInProduct(
       MultipartFile file,
-      @Positive Long id,
-      @NotBlank @RequestHeader(name = "username") String username) throws IOException {
-    if (file.isEmpty()) {
-        return ResponseEntity.badRequest().body("Файл не найден");
+      @NotNull @Positive Long id,
+      @NotBlank @RequestHeader(name = "username") String username) {
+    try {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("Файл не найден");
+        }
+        imageService.addImageInProduct(file, username, id);
+        return ResponseEntity.ok().body("Success Upload!");
+    } catch (IOException e) {
+        throw new RuntimeException(e);
     }
-    imageService.addImageInProduct(file,username,id);
-    return ResponseEntity.ok().body("Success Upload!");
 }
-
 
 
 }

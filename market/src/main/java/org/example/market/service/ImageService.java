@@ -49,9 +49,7 @@ public void addAvatarUser(final String username,MultipartFile file) throws IOExc
             image.setUser(user.get());
         user.get().setImage(image);
     userRepository.save(user.get());
-
     }
-
 
 
 }
